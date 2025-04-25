@@ -33,19 +33,21 @@ ingredients_list = st.multiselect(
 if ingredients_list:
     ingredients_string = ''
 
+    if ingredients_list:
+    ingredients_string = ''
+
     for fruit_chosen in ingredients_list:
-    ingredients_string += fruit_chosen + ' '
+        ingredients_string += fruit_chosen + ' '
 
-    search_on = str(pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0])
+        search_on = str(pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0])
 
-    st.subheader(fruit_chosen + ' Nutrition Information')
-    smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on)
+        st.subheader(fruit_chosen + ' Nutrition Information')
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on)
 
-    if smoothiefroot_response.status_code == 200:
-        st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-    else:
-        st.error(f"Could not fetch data for {fruit_chosen}.")
-
+        if smoothiefroot_response.status_code == 200:
+            st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+        else:
+            st.error(f"Could not fetch data for {fruit_chosen}.")
 
     # SQL Insert Statement
     my_insert_stmt = f"""
