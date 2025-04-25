@@ -30,9 +30,6 @@ ingredients_list = st.multiselect(
 )
 
 # Show nutrition info and build insert query
-if ingredients_list:
-    ingredients_string = ''
-
     if ingredients_list:
     ingredients_string = ''
 
