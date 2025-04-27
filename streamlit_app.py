@@ -1,53 +1,52 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
-import re
 
-# Title and instructions
-st.title(":cup_with_straw: Update Your Smoothie Order :cup_with_straw:")
+
+
+# Write directly to the app
+st.title(":cup_with_straw: Customize Your Smoothie :cup_with_straw: ")
 st.write(
-  """Modify the fruits in your existing smoothie order by entering your name and choosing new ingredients."""
-)
+  """Choose the fruits you want in your custom Smoothie!
+  """)
 
-# Input for user's name
-name_on_order = st.text_input('Name on Smoothie:')
-st.write('Updating order for: ', name_on_order)
+# import streamlit as st
 
-# Connect to Snowflake
+name_on_order = st.text_input ('Name on Smoothie:')
+st.write('The name on your Smoothie will be: ', name_on_order)
+
 cnx = st.connection("snowflake")
 session = cnx.session()
-
-# Get fruit options
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('fruit_name'))
+# st.dataframe(data=my_dataframe, use_container_width=True)
 
-# Multiselect ingredients
 ingredients_list = st.multiselect(
-    'Choose up to 5 new ingredients:',
-    my_dataframe.to_pandas()['FRUIT_NAME'].tolist(),  # Assuming Snowflake stores as UPPERCASE
-    max_selections=5
+    'Choose up to 5 ingredients:'
+    , my_dataframe
+    , max_selections=5
 )
 
-# If user selects ingredients
 if ingredients_list:
-    # Sanitize user input (very important!)
-    name_on_order_clean = re.sub(r"[^a-zA-Z0-9\s]", "", name_on_order)
+    ingredients_string = ''
 
-    # Create ingredients string
-    ingredients_string = ' '.join(ingredients_list)
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+    
+    # st.write(ingredients_string)
 
-    # Prepare the UPDATE SQL
-    my_update_stmt = f"""
-        UPDATE smoothies.public.orders
-        SET ingredients = '{ingredients_string}'
-        WHERE name_on_order = '{name_on_order_clean}'
-    """
+    my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
+            values ('""" + ingredients_string + """','""" +name_on_order+"""') """
 
-    st.write("Your Update Preview:")
-    st.code(my_update_stmt)
+    st.write(my_insert_stmt)
+    # st.stop()
 
-    # Button to trigger update
-    time_to_update = st.button('Update Order')
+    
+    # st.write(my_insert_stmt)
+    time_to_insert = st.button('Submit Order')
 
-    if time_to_update:
-        result = session.sql(my_update_stmt).collect()
-        st.success('Your Smoothie has been updated!', icon="✅")
+    if time_to_insert:
+        session.sql(my_insert_stmt).collect()
+        
+        st.success('Your Smoothie is ordered!', icon="✅")
+
+
